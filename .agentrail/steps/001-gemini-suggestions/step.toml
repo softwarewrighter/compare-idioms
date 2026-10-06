@@ -1,8 +1,9 @@
 number = 1
 slug = "gemini-suggestions"
-status = "in-progress"
+status = "completed"
 description = "Run scripts/suggest.py over X_eTaL's 49 idioms with the user's Gemini key (GE..."
 role = "production"
 context_files = []
 created_at = "2026-10-06T13:37:04"
-commits = []
+completed_at = "2026-10-06T15:10:13"
+commits = ["fe104f817494d879a8aefc76abfb21e8d180a694"]

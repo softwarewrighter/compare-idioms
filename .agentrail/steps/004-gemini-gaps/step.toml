@@ -1,0 +1,8 @@
+number = 4
+slug = "gemini-gaps"
+status = "pending"
+description = "Run scripts/suggest.py --model gemini-3.8-flash (retry later if 503) over X_e..."
+role = "production"
+context_files = []
+created_at = "2026-10-06T15:10:23"
+commits = []

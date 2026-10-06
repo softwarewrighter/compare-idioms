@@ -1,0 +1,8 @@
+number = 3
+slug = "harness-spike"
+status = "pending"
+description = "the Rust crate, canonical value format, one adapter per language, X_eTaL's idioms end to end, goldens in reg/"
+role = "legacy"
+context_files = []
+created_at = "2026-10-06T13:37:04"
+commits = []

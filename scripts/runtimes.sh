@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# Install, build and check the language runtimes (docs/plan.md, M1).
+#   scripts/runtimes.sh install [name...]   # default: all of NAMES
+#   scripts/runtimes.sh doctor              # what is present, with a 1+1 check
+# Package-manager runtimes live outside the repository. Runtimes built from
+# source are cloned into work/runtimes/ (gitignored): nothing third-party is
+# ever committed here (CLAUDE.md).
+set -uo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RT="$root/work/runtimes"
+BREW="$(brew --prefix 2>/dev/null || echo /opt/homebrew)"
+NAMES="kona gnu-apl j uiua cbqn ngn-k"
+UIUA_VERSION="${UIUA_VERSION:-0.19.1}"
+# Pinned commits of the runtimes built from source (checked 2026-10-06).
+CBQN_COMMIT="${CBQN_COMMIT:-c893d3e7828899a50150df03ad33c9052fa51d3c}"
+NGNK_COMMIT="${NGNK_COMMIT:-b9eeb91e0343ef6029f59d55dd98f82667b9bd59}"
+
+# Where each runtime's binary is. J is called by this path, never as a bare
+# `jconsole`: /usr/bin/jconsole on macOS is Java's JConsole.
+bin_of() {
+    case "$1" in
+        kona)    echo "$BREW/bin/k" ;;
+        gnu-apl) echo "$BREW/bin/apl" ;;
+        j)       echo "$BREW/bin/jcon" ;;
+        uiua)    echo "${CARGO_HOME:-$HOME/.cargo}/bin/uiua" ;;
+        cbqn)    echo "$RT/CBQN/BQN" ;;
+        ngn-k)   echo "$RT/ngn-k/k" ;;
+    esac
+}
+
+clone() { # url dir commit
+    [ -d "$2/.git" ] || git clone --quiet "$1" "$2"
+    git -C "$2" checkout --quiet "$3"
+}
+
+install_one() {
+    mkdir -p "$RT"
+    case "$1" in
+        kona)    brew install kona ;;
+        gnu-apl) brew install gnu-apl ;;
+        j)       brew install --cask j ;;
+        uiua)    cargo install uiua --locked --version "$UIUA_VERSION" ;;
+        cbqn)    clone https://github.com/dzaima/CBQN "$RT/CBQN" "$CBQN_COMMIT" && make -C "$RT/CBQN" FFI=0 ;;   # no libffi needed: idioms do not call C
+        ngn-k)   clone https://codeberg.org/ngn/k "$RT/ngn-k" "$NGNK_COMMIT" && make -C "$RT/ngn-k" CC=clang k ;;
+        *)       echo "unknown runtime: $1" >&2; return 2 ;;
+    esac
+}
+
+# Run a command for at most 20 seconds (macOS has no timeout(1)).
+limit() { perl -e 'alarm shift; exec @ARGV' 20 "$@"; }
+
+# One line of 1+1 in each language; every one should print 2.
+# GNU APL never exits at end of input: its input must end with )OFF. It also
+# starts a background APserver that holds the output pipe open: --noSV stops that.
+smoke() {
+    local b; b="$(bin_of "$1")"
+    case "$1" in
+        kona)    echo '1+1' | limit "$b" 2>&1 ;;
+        gnu-apl) printf '1+1\n)OFF\n' | limit "$b" --script --noSV 2>&1 ;;
+        j)       echo '1+1' | limit "$b" 2>&1 ;;
+        uiua)    limit "$b" eval '+1 1' 2>&1 ;;
+        cbqn)    limit "$b" -p '1+1' 2>&1 ;;
+        ngn-k)   echo '1+1' | limit "$b" 2>&1 ;;
+    esac | tr -d ' \r' | grep -v '^$' | tail -1
+}
+
+where_from() {
+    case "$1" in
+        cbqn|ngn-k) local d="$RT/$([ "$1" = cbqn ] && echo CBQN || echo ngn-k)"
+                    echo "commit $(git -C "$d" rev-parse --short HEAD 2>/dev/null)" ;;
+        uiua)       "$(bin_of uiua)" --version 2>/dev/null | head -1 ;;
+        j)          brew list --cask --versions j 2>/dev/null ;;
+        *)          brew list --versions "$1" 2>/dev/null ;;
+    esac
+}
+
+doctor() {
+    local bad=0 n b got
+    for n in $NAMES; do
+        b="$(bin_of "$n")"
+        if [ ! -x "$b" ]; then printf '%-8s MISSING  %s\n' "$n" "$b"; bad=1; continue; fi
+        got="$(smoke "$n")"
+        if [ "$got" = 2 ]; then printf '%-8s ok       %s  (%s)\n' "$n" "$b" "$(where_from "$n")"
+        else printf '%-8s BROKEN   %s  1+1 gave: %s\n' "$n" "$b" "$got"; bad=1; fi
+    done
+    return $bad
+}
+
+case "${1:-}" in
+    install) shift; for n in ${*:-$NAMES}; do echo "== $n"; install_one "$n" || echo "FAILED: $n" >&2; done ;;
+    doctor)  doctor ;;
+    *)       sed -n '2,4p' "$0"; exit 2 ;;
+esac

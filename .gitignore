@@ -1,0 +1,29 @@
+# Third-party clones, builds and downloads (languages, tools, idiom sources):
+# never committed, see CLAUDE.md
+/work/
+
+# GNU APL writes its input history where it is run
+.apl.history
+
+# cargo
+/target/
+**/*.rs.bk
+
+# reg-rs: .rgt + .out + .err baselines are committed; .tdb* files are caches
+/reg/*.tdb*
+
+# agentrail raw session transcripts (large, local only)
+.agentrail/sessions/*.jsonl
+.agentrail-archive/*/sessions/*.jsonl
+
+# Claude Code local state (shared slash commands may live in .claude/commands/)
+.claude/*
+!.claude/commands/
+
+# editors and OS
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+__pycache__/

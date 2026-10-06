@@ -1,0 +1,4 @@
+command = "echo '1+1' | scripts/runtimes.sh run cbqn"
+timeout = 60
+exit_code = 0
+desc = "cbqn answers 1+1"

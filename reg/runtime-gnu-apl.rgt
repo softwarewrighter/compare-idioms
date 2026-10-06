@@ -1,0 +1,4 @@
+command = "echo '1+1' | scripts/runtimes.sh run gnu-apl"
+timeout = 60
+exit_code = 0
+desc = "gnu-apl answers 1+1"

@@ -55,10 +55,13 @@ def key():
 def call(path, body=None):
     req = urllib.request.Request(f"{API}/{path}", json.dumps(body).encode() if body else None,
                                  {"x-goog-api-key": key(), "Content-Type": "application/json"})
-    try:
-        return json.load(urllib.request.urlopen(req, timeout=180))
-    except urllib.error.HTTPError as e:
-        sys.exit(f"Gemini API: HTTP {e.code}: {e.read().decode()[:300]}")
+    for attempt in range(1, 7):  # busy or rate-limited: wait and try again
+        try:
+            return json.load(urllib.request.urlopen(req, timeout=180))
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 500, 503) or attempt == 6:
+                sys.exit(f"Gemini API: HTTP {e.code}: {e.read().decode()[:300]}")
+            time.sleep(15 * attempt)
 
 
 def mainstream():
@@ -141,6 +144,7 @@ def main():
     ap.add_argument("--model")
     ap.add_argument("--idioms", help="comma-separated ids (default: all)")
     ap.add_argument("--dry-run", action="store_true", help="print the prompts, call nothing")
+    ap.add_argument("--force", action="store_true", help="ask again for idioms already answered")
     a = ap.parse_args()
     if a.list_models:
         for m in call("models?pageSize=200").get("models", []):
@@ -159,6 +163,8 @@ def main():
     out = ROOT / "work/suggestions" / a.model
     out.mkdir(parents=True, exist_ok=True)
     for i in ids:
+        if (out / f"{i}.json").exists() and not a.force:
+            continue  # already answered: a stopped run resumes where it left off
         body = {"contents": [{"parts": [{"text": prompt(recs[i])}]}],
                 "generationConfig": {"temperature": 0, "responseMimeType": "application/json"}}
         r = call(f"models/{a.model}:generateContent", body)

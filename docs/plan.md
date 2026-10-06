@@ -100,11 +100,38 @@ Checked on this machine (arm64 macOS) on 2026-10-06:
 - Installing GNU APL brought in GTK 3 and its dependencies and upgraded
   Homebrew's readline. The J cask put three apps in `/Applications`.
 
+## Results so far
+
+2026-10-06, `scripts/idiom.py check`: the 16 Rosetta idioms that have a plain
+input and an expected output, run in all seven columns (112 cells) with
+X_eTaL's own cells as the candidates. 108 agree with X_eTaL's expected
+output, 10 of those after allowing for counting from 0 (`where` and
+`index-of` in J, BQN, both Ks and Uiua). Each agreeing cell is a reg-rs test,
+`reg/idiom-<idiom>-<column>.rgt`, plus one `runtime-<name>` test per
+runtime: 115 tests, all passing.
+
+The comparison is lenient (items printed, not types or shapes), so "agrees"
+means "passed one input". Four cells differ, and all four are wrong in
+X_eTaL's data, which its own checks never ran:
+
+| Cell | Expression | What happened |
+|---|---|---|
+| rotate, ngn/k | `1!v` | gives `0 0 0 0 0`: in ngn/k `!` is not rotate (it is in K3, where the same cell works) |
+| numbers, BQN | `•ParseFloat t` | "Malformed input": parses one number, not a list |
+| numbers, Uiua | `⋕ t` | "Cannot parse into number": same problem |
+| numbers, Kona | `.t` | the ngn/k cell tried unchanged; prints a garbage float |
+
+The `k3` column has no cells of its own: it runs X_eTaL's ngn/k cells
+unchanged in Kona, and 15 of 16 happen to work.
+
 Not yet done:
 
-- Nothing has been run beyond `1+1`. No idiom has been tested.
+- The other 15 Rosetta idioms (function operands, I/O, no expected output)
+  and the 18 mainstream-only idioms have not been run anywhere.
 - No idiom source has been downloaded or parsed. Counts and numbering
   schemes are from web pages, not from the data.
+- Gemini has not answered: every request on 2026-10-06 got "high demand"
+  (503), and `gemini-pro-latest` is over this key's quota (429).
 
 A Linux machine is available if needed (the user has an Arch Linux system).
 The six runtimes above do not need it. kbm might: the fork's Linux builds run

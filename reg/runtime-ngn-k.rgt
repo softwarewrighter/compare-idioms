@@ -1,0 +1,4 @@
+command = "echo '1+1' | scripts/runtimes.sh run ngn-k"
+timeout = 60
+exit_code = 0
+desc = "ngn-k answers 1+1"

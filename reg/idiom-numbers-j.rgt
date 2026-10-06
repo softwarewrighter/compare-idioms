@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run numbers j"
+timeout = 60
+exit_code = 0
+desc = "Text to numbers in j: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

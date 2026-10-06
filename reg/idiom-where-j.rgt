@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run where j"
+timeout = 60
+exit_code = 0
+desc = "Where in j: agrees with X_eTaL counting from 0. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

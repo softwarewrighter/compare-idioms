@@ -1,0 +1,4 @@
+command = "echo '1+1' | scripts/runtimes.sh run kona"
+timeout = 60
+exit_code = 0
+desc = "kona answers 1+1"

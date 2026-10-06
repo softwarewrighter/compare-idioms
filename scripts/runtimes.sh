@@ -2,6 +2,8 @@
 # Install, build and check the language runtimes (docs/plan.md, M1).
 #   scripts/runtimes.sh install [name...]   # default: all of NAMES
 #   scripts/runtimes.sh doctor              # what is present, with a 1+1 check
+#   scripts/runtimes.sh run NAME            # run the program on stdin in NAME
+#   scripts/runtimes.sh tests               # a reg-rs test (1+1) per runtime
 # Package-manager runtimes live outside the repository. Runtimes built from
 # source are cloned into work/runtimes/ (gitignored): nothing third-party is
 # ever committed here (CLAUDE.md).
@@ -25,6 +27,7 @@ bin_of() {
         uiua)    echo "${CARGO_HOME:-$HOME/.cargo}/bin/uiua" ;;
         cbqn)    echo "$RT/CBQN/BQN" ;;
         ngn-k)   echo "$RT/ngn-k/k" ;;
+        xetal)   echo "${XETAL:-$root/../X_eTaL}/target/debug/xetal" ;;
     esac
 }
 
@@ -64,6 +67,20 @@ smoke() {
     esac | tr -d ' \r' | grep -v '^$' | tail -1
 }
 
+# Run the program on stdin in one runtime and print what it prints. This is
+# the one place that knows each interpreter's flags and habits.
+run_one() {
+    local b prog; b="$(bin_of "$1")"; prog="$(cat)"
+    [ -x "$b" ] || { echo "runtime not installed: $1" >&2; return 127; }
+    case "$1" in
+        kona|ngn-k|j) printf '%s\n' "$prog" | limit "$b" ;;
+        gnu-apl)      printf '%s\n)OFF\n' "$prog" | limit "$b" --script --noSV ;;
+        uiua)         limit "$b" eval "$prog" ;;
+        cbqn)         limit "$b" -p "$prog" ;;
+        xetal)        limit "$b" eval -e "$prog" ;;
+    esac 2>&1
+}
+
 where_from() {
     case "$1" in
         cbqn|ngn-k) local d="$RT/$([ "$1" = cbqn ] && echo CBQN || echo ngn-k)"
@@ -72,6 +89,18 @@ where_from() {
         j)          brew list --cask --versions j 2>/dev/null ;;
         *)          brew list --versions "$1" 2>/dev/null ;;
     esac
+}
+
+# reg-rs smoke tests: one per runtime, so a missing or changed runtime fails
+# on its own, apart from the idiom tests.
+tests() {
+    local n prog
+    for n in $NAMES xetal; do
+        [ -e "$root/reg/runtime-$n.rgt" ] && continue
+        case "$n" in uiua) prog='+1 1' ;; xetal) prog='1 + 1' ;; *) prog='1+1' ;; esac
+        "$root/scripts/reg.sh" create -t "runtime-$n" --timeout 60 --desc "$n answers 1+1" \
+            -c "echo '$prog' | scripts/runtimes.sh run $n" >/dev/null
+    done
 }
 
 doctor() {
@@ -89,5 +118,7 @@ doctor() {
 case "${1:-}" in
     install) shift; for n in ${*:-$NAMES}; do echo "== $n"; install_one "$n" || echo "FAILED: $n" >&2; done ;;
     doctor)  doctor ;;
-    *)       sed -n '2,4p' "$0"; exit 2 ;;
+    run)     run_one "${2:?runtime name}" ;;
+    tests)   tests ;;
+    *)       sed -n '2,6p' "$0"; exit 2 ;;
 esac

@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run index-of gnu-apl"
+timeout = 60
+exit_code = 0
+desc = "Index of in gnu-apl: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

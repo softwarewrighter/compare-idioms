@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run count k3"
+timeout = 60
+exit_code = 0
+desc = "Count in k3: agrees with X_eTaL. Credit: ngn/k expression run unchanged in Kona from X_eTaL Rosetta data (Michael A Wright, MIT)."

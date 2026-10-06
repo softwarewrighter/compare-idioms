@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run iota bqn"
+timeout = 60
+exit_code = 0
+desc = "1 to n in bqn: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

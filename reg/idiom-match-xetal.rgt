@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run match xetal"
+timeout = 60
+exit_code = 0
+desc = "Match in xetal: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

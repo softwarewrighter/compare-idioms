@@ -1,6 +1,6 @@
 number = 1
 slug = "gemini-suggestions"
-status = "pending"
+status = "in-progress"
 description = "Run scripts/suggest.py over X_eTaL's 49 idioms with the user's Gemini key (GE..."
 role = "production"
 context_files = []

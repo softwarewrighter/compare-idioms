@@ -353,6 +353,10 @@ Read before working:
 ```bash
 scripts/runtimes.sh doctor            # which runtimes are present; 1+1 in each
 scripts/runtimes.sh install [name...] # kona gnu-apl j uiua cbqn ngn-k
+scripts/runtimes.sh run NAME          # run the program on stdin in one runtime
+scripts/idiom.py check                # X_eTaL's idioms in every runtime: agree or differ
+scripts/idiom.py tests                # a reg-rs test per agreeing cell
+scripts/idiom.py attributions         # regenerate "Idioms by source"
 scripts/reg.sh run                    # reg-rs baselines (REG_RS_DATA_DIR=reg)
 scripts/reg.sh <reg-rs args>          # any other reg-rs command
 scripts/suggest.py --dry-run          # the prompts for X_eTaL's 49 idioms

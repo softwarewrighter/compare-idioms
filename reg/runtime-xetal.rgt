@@ -1,0 +1,4 @@
+command = "echo '1 + 1' | scripts/runtimes.sh run xetal"
+timeout = 60
+exit_code = 0
+desc = "xetal answers 1+1"

@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run sum k"
+timeout = 60
+exit_code = 0
+desc = "Sum in k: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

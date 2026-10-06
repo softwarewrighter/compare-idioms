@@ -117,8 +117,8 @@ X_eTaL's data, which its own checks never ran:
 | Cell | Expression | What happened |
 |---|---|---|
 | rotate, ngn/k | `1!v` | gives `0 0 0 0 0`: in ngn/k `!` is not rotate (it is in K3, where the same cell works) |
-| numbers, BQN | `•ParseFloat t` | "Malformed input": parses one number, not a list |
-| numbers, Uiua | `⋕ t` | "Cannot parse into number": same problem |
+| numbers, BQN | `&bull;ParseFloat t` | "Malformed input": parses one number, not a list |
+| numbers, Uiua | `&#8917; t` (parse) | "Cannot parse into number": same problem |
 | numbers, Kona | `.t` | the ngn/k cell tried unchanged; prints a garbage float |
 
 The `k3` column has no cells of its own: it runs X_eTaL's ngn/k cells

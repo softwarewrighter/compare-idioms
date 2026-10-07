@@ -1,0 +1,8 @@
+number = 5
+slug = "source-ingestion"
+status = "pending"
+description = "M3 in docs/plan.md: fetch each idiom source into work/sources/ (never committ..."
+role = "production"
+context_files = []
+created_at = "2026-10-07T15:16:53"
+commits = []

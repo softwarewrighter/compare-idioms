@@ -1,6 +1,6 @@
 number = 3
 slug = "harness-spike"
-status = "pending"
+status = "in-progress"
 description = "the Rust crate, canonical value format, one adapter per language, X_eTaL's idioms end to end, goldens in reg/"
 role = "legacy"
 context_files = []

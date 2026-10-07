@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run match uiua"
-timeout = 60
+command = "target/release/compare-idioms run match uiua"
+timeout = 180
 exit_code = 0
 desc = "Match in uiua: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

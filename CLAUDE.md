@@ -308,17 +308,23 @@ Read before working:
 scripts/runtimes.sh doctor            # which runtimes are present; 1+1 in each
 scripts/runtimes.sh install [name...] # kona gnu-apl j uiua cbqn ngn-k kbm
 scripts/runtimes.sh run NAME          # run the program on stdin in one runtime
-scripts/idiom.py check                # X_eTaL's idioms in every runtime: agree or differ
-scripts/idiom.py tests                # a reg-rs test per agreeing cell
-scripts/idiom.py attributions         # regenerate "Idioms by source"
-scripts/reg.sh run                    # reg-rs baselines (REG_RS_DATA_DIR=reg)
+cargo build --release                 # target/release/compare-idioms
+cargo test                            # unit tests (no runtimes needed)
+target/release/compare-idioms check   # X_eTaL's idioms in every column: the table
+target/release/compare-idioms run IDIOM COLUMN   # one cell: verdict and value
+target/release/compare-idioms tests   # a reg-rs test per new agreeing cell
+target/release/compare-idioms attributions       # regenerate "Idioms by source"
+scripts/reg.sh run                    # build, then the reg-rs baselines
 scripts/reg.sh <reg-rs args>          # any other reg-rs command
 scripts/suggest.py --dry-run          # the prompts for X_eTaL's 49 idioms
 scripts/suggest.py --model MODEL      # ask Gemini; answers go to work/suggestions/
 ```
 
-The Rust crate and a justfile do not exist yet (milestone M2 of
-`docs/plan.md`). Add their commands here in the step that creates them.
+Workspace: `crates/ci-value` (canonical value, native-display parser,
+strict comparison), `crates/ci-catalog` (X_eTaL's data read in place),
+`crates/ci-lang` (per-column literals, programs, serializers, decoding),
+`crates/compare-idioms` (the binary). An adapter change shows up in the
+reg-rs goldens: review the diff, never rebase blindly.
 
 kbm runs under QEMU: one boot per program, about 8 seconds. Its build
 writes only gitignored files in `../kbm-fork`; never commit there.

@@ -1,0 +1,14 @@
+[package]
+name = "compare-idioms"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Run the same idiom in several array languages and check the outputs agree"
+
+[dependencies]
+ci-value.workspace = true
+ci-catalog.workspace = true
+ci-lang.workspace = true
+clap.workspace = true

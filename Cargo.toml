@@ -1,0 +1,18 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["Michael A Wright"]
+repository = "https://github.com/softwarewrighter/compare-idioms"
+
+[workspace.dependencies]
+ci-value = { path = "crates/ci-value" }
+ci-catalog = { path = "crates/ci-catalog" }
+ci-lang = { path = "crates/ci-lang" }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.9"

@@ -106,24 +106,26 @@ Checked on this machine (arm64 macOS) on 2026-10-06:
 
 ## Results so far
 
-2026-10-07, `scripts/idiom.py check`: the 16 Rosetta idioms that have a plain
-input and an expected output, run in all eight columns (128 cells) with
-X_eTaL's own cells as the candidates. 112 agree with X_eTaL's expected
-output, 11 of those after allowing for counting from 0 (`where` and
-`index-of` in J, BQN, the Ks and Uiua). Each agreeing cell is a reg-rs test,
-`reg/idiom-<idiom>-<column>.rgt`, plus one `runtime-<name>` test per
-runtime: 120 tests, all passing, in about 15 seconds in parallel.
+2026-10-07, `compare-idioms check` (the Rust harness): the 16 Rosetta idioms
+that have a plain input and an expected output, run in all eight columns (128
+cells) with X_eTaL's own cells as the candidates. 112 agree with X_eTaL's
+expected result. The comparison is strict: the same shape, the same kind
+(numbers or characters) and the same items, numbers within a relative 1e-9.
+The two index idioms (`where`, `index-of`) are compared after shifting the
+expected result to the column's index origin. Each agreeing cell is a reg-rs
+test, `reg/idiom-<idiom>-<column>.rgt`, plus one `runtime-<name>` test per
+runtime: 120 tests, all passing, in about 13 seconds in parallel.
 
-The comparison is lenient (items printed, not types or shapes), so "agrees"
-means "passed one input". Outside kbm, four cells differ, and all four are
-wrong in X_eTaL's data, which its own checks never ran:
+"Agrees" still means "passed one input": each idiom has a single case.
+Outside kbm, four cells do not agree, and all four are wrong in X_eTaL's
+data, which its own checks never ran:
 
 | Cell | Expression | What happened |
 |---|---|---|
 | rotate, ngn/k | `1!v` | gives `0 0 0 0 0`: in ngn/k `!` is not rotate (it is in K3, where the same cell works) |
 | numbers, BQN | `&bull;ParseFloat t` | "Malformed input": parses one number, not a list |
 | numbers, Uiua | `&#8917; t` (parse) | "Cannot parse into number": same problem |
-| numbers, Kona | `.t` | the ngn/k cell tried unchanged; prints a garbage float |
+| numbers, Kona | `.t` | the ngn/k cell tried unchanged; gives a scalar garbage float |
 
 The `k3` and `kbm` columns have no cells of their own: they run X_eTaL's
 ngn/k cells unchanged. In Kona 15 of 16 happen to work. In kbm 4 do (iota,
@@ -132,11 +134,12 @@ count, index-of, reverse):
 | kbm reply | Idioms | Meaning |
 |---|---|---|
 | `nyi` | sum, running sum, sort, where, format, numbers | the primitive is not implemented: outside the subset |
-| `#rank`, `_rank` | reshape, match | an error: `#` with a two-item shape, and `~` (match), are not supported |
-| wrong or empty | rotate, member, shape, transpose | rotate differs (`!` is not rotate here either); member uses `?` on a list; shape and transpose need a 2 by 3 matrix, which kbm cannot build |
+| `#rank`, `_rank` | reshape, match, shape, transpose | an error: `#` with a two-item shape cannot build the 2 by 3 input or result, and `~` (match) is not supported |
+| differs | rotate | `!` is not rotate here either |
+| no answer | member | `(v?x)<#v` printed `_` in one session and nothing in others; not understood |
 
 None of these is retried in another spelling yet: whether kbm can express
-the idiom another way is for the per-dialect cells, after M2.
+the idiom another way is for the per-dialect cells.
 
 Not yet done:
 
@@ -326,9 +329,26 @@ carries a reason from a fixed list, so the gaps can be counted and reported.
 Each language prints arrays its own way, so comparing printed output directly
 would fail on formatting alone. Each language gets an adapter that does two
 things: turns a neutral input value into a literal in that language, and
-turns the result into one canonical text form (type, shape, elements). The
-harness compares canonical text. Where the language can serialize its own
-result, it does; where it cannot (kbm), the adapter parses the native display.
+turns the result into one canonical value: a shape and items that are all
+numbers or all characters, printed as `num [2 3] 1 2 3 4 5 6` or
+`char [5] "EDCBA"`.
+
+Built 2026-10-07 (`crates/`): where the language can describe its own result,
+the program ends with a one-line serializer that prints `kind|shape|items`
+(J, BQN, GNU APL, ngn/k, Kona). Uiua, kbm and X_eTaL are read from their
+native display instead: Uiua's switch modifier made a serializer awkward and
+its display is unambiguous (brackets, quotes, box borders); kbm cannot print
+floats; X_eTaL's display is the reference format. Unquoted text (APL, J,
+X_eTaL print strings bare) is read as characters when the expected result is
+text. Error reports in every language (`'type`, `|domain error`, `Error:`,
+`DOMAIN ERROR`, `#rank`) and kbm's `nyi` are recognized and reported as such,
+not as wrong answers.
+
+Habits found while building the adapters: BQN's `-p` echoes the last value,
+so the decoder takes the first serializer line; Kona's `` `0: `` adds no
+newline, so its line ends with one; kbm's driver skips lines starting with
+`#`, and an error on a binding line must be kept, not just the last line's
+output.
 
 The differences that the canonical form or the status has to account for:
 
@@ -434,10 +454,14 @@ Tests:
   expected result. This is the cross-language check.
 - One smoke test per runtime, `runtime-<lang>`.
 
-Per-language tests mean a missing runtime fails only its own tests. Because
-kbm and some others are run in batch, the harness caches one batch run per
-language and the per-idiom tests read from it; how that fits reg-rs's
-one-command-per-test model is a question for the spike.
+Per-language tests mean a missing runtime fails only its own tests.
+
+As built (2026-10-07): each test runs `target/release/compare-idioms run IDIOM
+COLUMN` and its golden is one line, the verdict and the canonical value
+(`agree num [2] 1 2`). The `idiom-<id>-agree` test is not built: `compare-idioms
+check` gives the cross-language table instead. Batch mode is not built either:
+every cell is its own process, kbm's included (one 8-second boot each), and
+reg-rs runs the tests in parallel, so the whole suite takes about 13 seconds.
 
 ## Milestones
 
@@ -449,13 +473,14 @@ seven runtimes (kbm under QEMU among them) with pinned versions and commits,
 its `doctor` checks them, and `runtime-<name>` reg-rs tests cover each one and
 X_eTaL.
 
-**M2. Harness spike on X_eTaL's table.** The Rust crate, the canonical value
-format and one adapter per language. Run the 31 Rosetta idioms read in place
-from `../X_eTaL`. The outcome is a report of which cells pass, which differ
-and which never ran, goldens in `reg/`, and the generator for the "Idioms
-by source" section of `ATTRIBUTIONS.md`. The spike exists to find out
-whether the canonical form survives contact with all the runtimes before any
-bulk import.
+**M2. Harness spike on X_eTaL's table.** Done 2026-10-07: a Rust workspace
+(`crates/`: `ci-value` the canonical value, `ci-catalog` X_eTaL's data read in
+place, `ci-lang` one adapter per column, `compare-idioms` the binary) with
+`check`, `run`, `tests` and `attributions`. It replaced the Python stopgap.
+The canonical form survived all eight runtimes: strict checking agrees on the
+same 112 of 128 cells the lenient one did. Left for later: the 15 Rosetta
+idioms with function operands or I/O, more than one case per idiom, batch
+mode, empty arrays and nested values (none of the 16 needs them).
 
 **M3. Source ingestion.** Fetch each source into `work/sources/` with its
 provenance and license. Read the terms still marked "not found", FinnAPL's

@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run sum j"
-timeout = 60
+command = "target/release/compare-idioms run sum j"
+timeout = 180
 exit_code = 0
 desc = "Sum in j: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

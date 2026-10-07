@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run index-of xetal"
-timeout = 60
+command = "target/release/compare-idioms run index-of xetal"
+timeout = 180
 exit_code = 0
 desc = "Index of in xetal: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

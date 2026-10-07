@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run reshape k"
-timeout = 60
+command = "target/release/compare-idioms run reshape k"
+timeout = 180
 exit_code = 0
 desc = "Reshape in k: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

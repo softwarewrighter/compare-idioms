@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run reverse kbm"
+command = "target/release/compare-idioms run reverse kbm"
 timeout = 180
 exit_code = 0
 desc = "Reverse in kbm: agrees with X_eTaL. Credit: ngn/k expression run unchanged in kbm from X_eTaL Rosetta data (Michael A Wright, MIT)."

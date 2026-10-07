@@ -54,8 +54,9 @@ install_kbm() {
     cp "$KBM/test/out/k-head.img" "$RT/kbm/k-head.img"
 }
 
-# Run a k program in kbm: boot QEMU, type each line, print what k printed
-# after the last line. One boot per program (about 10-20 seconds).
+# Run a k program in kbm: boot QEMU, type each line, print everything k
+# printed (an error on a binding line included), without the echoed input.
+# One boot per program, about 8 seconds.
 run_kbm() {
     local f="$root/work/kbm-$$.k"
     # drive_qemu.py skips lines that start with # as comments: indent them.
@@ -64,7 +65,7 @@ run_kbm() {
         qemu-system-x86_64 -machine q35 -cpu Westmere -smp 1 -m 2048 -display none \
         -monitor none -serial stdio -no-reboot \
         -drive "id=disk0,file=$(bin_of kbm),if=none,format=raw,snapshot=on" \
-        -device virtio-blk-pci,drive=disk0 | awk '/^ <</{out=""; next} {out=out $0 "\n"} END{printf "%s", out}'
+        -device virtio-blk-pci,drive=disk0 | grep -v '^ <<'
     rm -f "$f"
 }
 

@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run running-sum xetal"
-timeout = 60
+command = "target/release/compare-idioms run running-sum xetal"
+timeout = 180
 exit_code = 0
 desc = "Running sum in xetal: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

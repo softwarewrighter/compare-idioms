@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run count kbm"
+command = "target/release/compare-idioms run count kbm"
 timeout = 180
 exit_code = 0
 desc = "Count in kbm: agrees with X_eTaL. Credit: ngn/k expression run unchanged in kbm from X_eTaL Rosetta data (Michael A Wright, MIT)."

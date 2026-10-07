@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run where gnu-apl"
-timeout = 60
+command = "target/release/compare-idioms run where gnu-apl"
+timeout = 180
 exit_code = 0
 desc = "Where in gnu-apl: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

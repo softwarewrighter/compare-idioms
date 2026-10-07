@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run numbers gnu-apl"
-timeout = 60
+command = "target/release/compare-idioms run numbers gnu-apl"
+timeout = 180
 exit_code = 0
 desc = "Text to numbers in gnu-apl: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

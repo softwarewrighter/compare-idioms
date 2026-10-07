@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run iota k3"
-timeout = 60
+command = "target/release/compare-idioms run iota k3"
+timeout = 180
 exit_code = 0
 desc = "1 to n in k3: agrees with X_eTaL. Credit: ngn/k expression run unchanged in Kona from X_eTaL Rosetta data (Michael A Wright, MIT)."

@@ -1,0 +1,10 @@
+[package]
+name = "ci-lang"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+ci-value.workspace = true

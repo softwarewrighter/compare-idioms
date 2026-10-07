@@ -34,8 +34,9 @@ Dyalog APL is deferred until its license terms are settled.
 The first idiom set is X_eTaL's own: the 31 idioms its Rosetta stone
 compares across APL2, Dyalog, J, BQN, ngn/k, Uiua and X_eTaL, plus 18
 from its idiom table. Of the 16 that have an input and an expected
-output, 112 of 128 cells agree across eight runtimes (11 after allowing
-for counting from 0), and each agreeing cell is a reg-rs test: 120
+output, 112 of 128 cells agree across eight runtimes, compared
+strictly (shape, kind and items; index results shifted to each
+language's index origin), and each agreeing cell is a reg-rs test: 120
 tests with the runtime checks, all passing. Four cells turned out to be
 wrong in X_eTaL's data, and kbm, a deliberately small k, handles 4 of
 the 16. Details, the design and what comes next are in
@@ -49,7 +50,8 @@ in `../X_eTaL`, and kbm's fork in `../kbm-fork`.
 ```bash
 scripts/runtimes.sh install     # Kona, GNU APL, J, Uiua, CBQN, ngn/k, kbm
 scripts/runtimes.sh doctor      # each runtime answers 1+1
-scripts/idiom.py check          # X_eTaL's idioms in every runtime
+cargo build --release           # the harness, target/release/compare-idioms
+target/release/compare-idioms check   # X_eTaL's idioms in every runtime
 scripts/reg.sh run              # the regression tests in reg/
 echo '|"ABCDE"' | scripts/runtimes.sh run kbm   # one line of k, booted in QEMU
 ```

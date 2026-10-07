@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run index-of k3"
-timeout = 60
+command = "target/release/compare-idioms run index-of k3"
+timeout = 180
 exit_code = 0
-desc = "Index of in k3: agrees with X_eTaL counting from 0. Credit: ngn/k expression run unchanged in Kona from X_eTaL Rosetta data (Michael A Wright, MIT)."
+desc = "Index of in k3: agrees with X_eTaL. Credit: ngn/k expression run unchanged in Kona from X_eTaL Rosetta data (Michael A Wright, MIT)."

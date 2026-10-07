@@ -1,4 +1,4 @@
-command = "scripts/idiom.py run where xetal"
-timeout = 60
+command = "target/release/compare-idioms run where xetal"
+timeout = 180
 exit_code = 0
 desc = "Where in xetal: agrees with X_eTaL. Credit: expression from X_eTaL Rosetta data (Michael A Wright, MIT)."

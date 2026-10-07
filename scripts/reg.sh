@@ -2,13 +2,15 @@
 # Wrap reg-rs so baselines live in the repo under reg/.
 #   scripts/reg.sh run            # run every baseline
 #   scripts/reg.sh <reg-rs args>  # any other reg-rs command
-# Baseline commands run from the repo root.
+# Baseline commands run from the repo root, after a release build.
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 export REG_RS_DATA_DIR="$root/reg"
 mkdir -p "$REG_RS_DATA_DIR"
 command -v reg-rs >/dev/null || { echo "reg-rs not found on PATH" >&2; exit 127; }
+# The idiom tests run target/release/compare-idioms: build it first.
+cargo build -q --release -p compare-idioms
 if [ "${1:-}" = "run" ] && [ "$#" -eq 1 ]; then
     exec reg-rs run -p .rgt --parallel
 fi

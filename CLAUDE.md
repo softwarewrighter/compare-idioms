@@ -349,6 +349,18 @@ in the commit message.
 9. detailed commit message; commit `.agentrail/` changes too
 10. then `agentrail complete`, push
 
+## Every step ends the same way (the user's instruction, 2026-10-06)
+
+1. Tests pass: `scripts/reg.sh run` and, once there is a crate, `cargo test`.
+2. Docs updated: README status, `docs/plan.md`, `ATTRIBUTIONS.md` if a
+   source or idiom was added, this file if a command or rule changed.
+3. `.gitignore` is sane: `git status` shows nothing from `work/`, no
+   caches, no key, nothing third-party.
+4. Commit to `main` with a detailed message; `agentrail complete`;
+   commit `.agentrail/`; push.
+5. Report to the user: what was pushed, what is demoable (a command
+   they can run), what is blocked and on what, and the next step(s).
+
 ## Key Rules
 
 - **Work on `main` only** (the user's instruction, 2026-10-06). No

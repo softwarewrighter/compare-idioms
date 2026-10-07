@@ -306,7 +306,7 @@ Read before working:
 
 ```bash
 scripts/runtimes.sh doctor            # which runtimes are present; 1+1 in each
-scripts/runtimes.sh install [name...] # kona gnu-apl j uiua cbqn ngn-k
+scripts/runtimes.sh install [name...] # kona gnu-apl j uiua cbqn ngn-k kbm
 scripts/runtimes.sh run NAME          # run the program on stdin in one runtime
 scripts/idiom.py check                # X_eTaL's idioms in every runtime: agree or differ
 scripts/idiom.py tests                # a reg-rs test per agreeing cell
@@ -319,6 +319,9 @@ scripts/suggest.py --model MODEL      # ask Gemini; answers go to work/suggestio
 
 The Rust crate and a justfile do not exist yet (milestone M2 of
 `docs/plan.md`). Add their commands here in the step that creates them.
+
+kbm runs under QEMU: one boot per program, about 8 seconds. Its build
+writes only gitignored files in `../kbm-fork`; never commit there.
 
 Running an interpreter from a script: always give it a time limit.
 GNU APL needs `--script --noSV` and input ending in `)OFF`, or it never

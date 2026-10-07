@@ -1,6 +1,6 @@
 number = 2
 slug = "kbm-qemu"
-status = "pending"
+status = "in-progress"
 description = "install nasm and get kbm running under QEMU from ../kbm-fork, driven as one transcript"
 role = "legacy"
 context_files = []

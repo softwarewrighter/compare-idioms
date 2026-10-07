@@ -78,7 +78,7 @@ single source.
 
 Checked on this machine (arm64 macOS) on 2026-10-06:
 
-- Six runtimes are installed and answer `1+1` (`scripts/runtimes.sh doctor`):
+- Seven runtimes are installed and answer `1+1` (`scripts/runtimes.sh doctor`):
 
   | Column | Runtime | Version | Where |
   |---|---|---|---|
@@ -88,8 +88,8 @@ Checked on this machine (arm64 macOS) on 2026-10-06:
   | `uiua` | Uiua | 0.19.1 | `cargo install` |
   | `bqn` | CBQN | commit c893d3e7 | `work/runtimes/CBQN`, built with `FFI=0` |
   | `k` | ngn/k | commit b9eeb91e | `work/runtimes/ngn-k`, a native arm64 build |
+  | `kbm` | k edu on BareMetal-OS | kbm-fork af29a3c, BareMetal-OS 0edc835 | `work/runtimes/kbm/k-head.img`, booted in QEMU (2026-10-07) |
 
-- kbm is not built yet. It needs `nasm`, which is not installed.
 - `../X_eTaL` has a built `target/debug/xetal`.
 - `/usr/bin/jconsole` is **Java's JConsole, not J**. The J cask links J as
   both `jconsole` and `jcon` in Homebrew's bin; the scripts use `jcon`.
@@ -99,20 +99,24 @@ Checked on this machine (arm64 macOS) on 2026-10-06:
   It also writes `.apl.history` where it runs (gitignored).
 - Installing GNU APL brought in GTK 3 and its dependencies and upgraded
   Homebrew's readline. The J cask put three apps in `/Applications`.
+- kbm brought in `nasm`, `mtools` and `x86_64-elf-binutils` from Homebrew
+  (QEMU was already there). macOS's own `ld` cannot link the ELF guest, so
+  `work/bin/` holds `ld`, `objcopy` and `objdump` links to the
+  `x86_64-elf-` tools, first on PATH only while kbm builds.
 
 ## Results so far
 
-2026-10-06, `scripts/idiom.py check`: the 16 Rosetta idioms that have a plain
-input and an expected output, run in all seven columns (112 cells) with
-X_eTaL's own cells as the candidates. 108 agree with X_eTaL's expected
-output, 10 of those after allowing for counting from 0 (`where` and
-`index-of` in J, BQN, both Ks and Uiua). Each agreeing cell is a reg-rs test,
+2026-10-07, `scripts/idiom.py check`: the 16 Rosetta idioms that have a plain
+input and an expected output, run in all eight columns (128 cells) with
+X_eTaL's own cells as the candidates. 112 agree with X_eTaL's expected
+output, 11 of those after allowing for counting from 0 (`where` and
+`index-of` in J, BQN, the Ks and Uiua). Each agreeing cell is a reg-rs test,
 `reg/idiom-<idiom>-<column>.rgt`, plus one `runtime-<name>` test per
-runtime: 115 tests, all passing.
+runtime: 120 tests, all passing, in about 15 seconds in parallel.
 
 The comparison is lenient (items printed, not types or shapes), so "agrees"
-means "passed one input". Four cells differ, and all four are wrong in
-X_eTaL's data, which its own checks never ran:
+means "passed one input". Outside kbm, four cells differ, and all four are
+wrong in X_eTaL's data, which its own checks never ran:
 
 | Cell | Expression | What happened |
 |---|---|---|
@@ -121,8 +125,18 @@ X_eTaL's data, which its own checks never ran:
 | numbers, Uiua | `&#8917; t` (parse) | "Cannot parse into number": same problem |
 | numbers, Kona | `.t` | the ngn/k cell tried unchanged; prints a garbage float |
 
-The `k3` column has no cells of its own: it runs X_eTaL's ngn/k cells
-unchanged in Kona, and 15 of 16 happen to work.
+The `k3` and `kbm` columns have no cells of their own: they run X_eTaL's
+ngn/k cells unchanged. In Kona 15 of 16 happen to work. In kbm 4 do (iota,
+count, index-of, reverse):
+
+| kbm reply | Idioms | Meaning |
+|---|---|---|
+| `nyi` | sum, running sum, sort, where, format, numbers | the primitive is not implemented: outside the subset |
+| `#rank`, `_rank` | reshape, match | an error: `#` with a two-item shape, and `~` (match), are not supported |
+| wrong or empty | rotate, member, shape, transpose | rotate differs (`!` is not rotate here either); member uses `?` on a list; shape and transpose need a 2 by 3 matrix, which kbm cannot build |
+
+None of these is retried in another spelling yet: whether kbm can express
+the idiom another way is for the per-dialect cells, after M2.
 
 Not yet done:
 
@@ -134,9 +148,8 @@ Not yet done:
   (503), and `gemini-pro-latest` is over this key's quota (429).
 
 A Linux machine is available if needed (the user has an Arch Linux system).
-The six runtimes above do not need it. kbm might: the fork's Linux builds run
-as ordinary programs there, with no emulator. QEMU on the Mac stays the plan
-unless it proves too slow or fragile.
+Nothing needs it so far: kbm under QEMU on the Mac boots in about 8 seconds
+per program.
 
 ## What X_eTaL already has
 
@@ -248,14 +261,18 @@ Andrews. The fork adds portable builds for other CPUs and operating systems.
 How it differs from the other runtimes:
 
 - **It is not a host program on a Mac.** Decided 2026-10-06: kbm runs under
-  QEMU. That is the fork's documented Mac path, `test/qemu-portable.sh`:
-  build with `make PORTABLE=1`, boot BareMetal under `qemu-system-x86_64`,
-  and talk to k over the serial console. It needs `../BareMetal-OS`
-  (present) and `nasm` (not installed). It has not been tried on this
-  machine.
-- **It is driven as a transcript.** Lines go in, echoed results come out, as
-  in the fork's own `test/golden/basic.expected`. Booting once per idiom
-  would be slow, so the kbm adapter sends every case in one session.
+  QEMU. Working since 2026-10-07: `scripts/runtimes.sh install kbm` clones
+  and sets up BareMetal-OS under `work/runtimes/`, runs the fork's own
+  `test/qemu-portable.sh --test` (build with `make PORTABLE=1`, boot under
+  `qemu-system-x86_64`, diff the fork's golden transcript; it passes) and
+  copies the disk image to `work/runtimes/kbm/`. The build writes only
+  gitignored files inside `../kbm-fork`.
+- **It is driven as a transcript.** `scripts/runtimes.sh run kbm` boots the
+  image (with `snapshot=on`, so it is never modified), types the program a
+  line at a time through the fork's `test/drive_qemu.py`, and prints what k
+  printed after the last line. One boot per program takes about 8 seconds.
+  The fork's driver skips lines starting with `#` as comments, so such lines
+  are typed with a leading space.
 - **It is a real subset.** The fork's goldens record that `&` (where) and
   `^` (sort) answer `nyi`, `?` on a list is a type error, and every float
   prints as `?.?` because float formatting is stubbed out. Idioms that need
@@ -427,10 +444,10 @@ one-command-per-test model is a question for the spike.
 **M0. Bootstrap.** Done: CLAUDE.md, AGENTS.md, agentrail saga, `.gitignore`,
 `scripts/reg.sh`, `ATTRIBUTIONS.md`, this plan.
 
-**M1. Runtimes.** Partly done: `scripts/runtimes.sh` installs or builds six
-runtimes with pinned versions and commits, and its `doctor` checks them.
-Left: kbm under QEMU (needs `nasm` and a first working build on this
-machine), X_eTaL in the doctor check, and one reg-rs smoke test per runtime.
+**M1. Runtimes.** Done 2026-10-07: `scripts/runtimes.sh` installs or builds
+seven runtimes (kbm under QEMU among them) with pinned versions and commits,
+its `doctor` checks them, and `runtime-<name>` reg-rs tests cover each one and
+X_eTaL.
 
 **M2. Harness spike on X_eTaL's table.** The Rust crate, the canonical value
 format and one adapter per language. Run the 31 Rosetta idioms read in place

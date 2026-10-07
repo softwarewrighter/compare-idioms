@@ -15,7 +15,9 @@ the expected indices counted from 0. A cell that "agrees" has passed that
 check on one input, no more.
 
 Columns: xetal, gnu-apl (X_eTaL's APL2 cells), j, bqn, k (ngn/k),
-k3 (Kona, trying X_eTaL's ngn/k cell unchanged), uiua."""
+k3 (Kona) and kbm (k edu under QEMU), both trying X_eTaL's ngn/k cell
+unchanged, uiua. A cell kbm answers "nyi" (not yet implemented) is outside its
+subset: reported, not tested."""
 import os
 import re
 import subprocess
@@ -31,7 +33,7 @@ CREDIT = "X_eTaL Rosetta data (Michael A Wright, MIT)"
 
 # column -> (runtime name, X_eTaL column the candidate comes from)
 COLS = {"xetal": ("xetal", "xetal"), "gnu-apl": ("gnu-apl", "apl2"), "j": ("j", "j"), "bqn": ("cbqn", "bqn"),
-        "k": ("ngn-k", "k"), "k3": ("kona", "k"), "uiua": ("uiua", "uiua")}
+        "k": ("ngn-k", "k"), "k3": ("kona", "k"), "kbm": ("kbm", "k"), "uiua": ("uiua", "uiua")}
 
 def parse(binding):
     out = []
@@ -59,7 +61,7 @@ def lit(col, v):
     if col == "bqn":
         return {"str": lambda: f'"{v[1]}"', "int": lambda: v[1], "vec": lambda: "⟨" + ",".join(v[1]) + "⟩",
                 "mat": lambda: "‿".join(v[1]) + "⥊⟨" + ",".join(v[2]) + "⟩"}[kind]()
-    if col in ("k", "k3"):
+    if col in ("k", "k3", "kbm"):
         return {"str": lambda: f'"{v[1]}"', "int": lambda: v[1], "vec": lambda: " ".join(v[1]),
                 "mat": lambda: f"{' '.join(v[1])}#{' '.join(v[2])}"}[kind]()
     if col == "uiua":
@@ -73,7 +75,7 @@ def program(col, idiom):
         return None
     if col == "xetal":
         return f"{binding}; {src}"
-    arrow = {"gnu-apl": "←", "j": " =: ", "bqn": " ← ", "k": ":", "k3": ":", "uiua": " ← "}[col]
+    arrow = {"gnu-apl": "←", "j": " =: ", "bqn": " ← ", "k": ":", "k3": ":", "kbm": ":", "uiua": " ← "}[col]
     lines = [(n.upper() if col == "gnu-apl" else n) + arrow + lit(col, v) for n, v in parse(binding)]
     return "\n".join(lines + [src])
 
@@ -90,6 +92,10 @@ def norm(text):
     return toks
 
 def verdict(got, want):
+    if re.search(r"\bnyi\b", got):
+        return "nyi"  # kbm: the primitive is outside the dialect's subset
+    if re.fullmatch(r"\s*\S{0,2}(rank|type|length|domain|value|index|parse)\s*", got):
+        return "error"  # a k error report: the failing token, then its class
     g, w = norm(got), norm(want)
     if g == w:
         return "match"
@@ -114,7 +120,7 @@ def run(idiom, col):
     if prog is None:
         return None, None
     p = subprocess.run([str(ROOT / "scripts/runtimes.sh"), "run", COLS[col][0]], input=prog,
-                       capture_output=True, text=True, timeout=60)
+                       capture_output=True, text=True, timeout=180)
     return prog, p.stdout.rstrip()
 
 
@@ -129,7 +135,7 @@ def check():
 
 
 def report(res):
-    short = {"match": "ok", "match-0-origin": "ok(0)", "differs": "DIFF", "no-cell": "-"}
+    short = {"match": "ok", "match-0-origin": "ok(0)", "differs": "DIFF", "no-cell": "-", "nyi": "nyi", "error": "err"}
     print(f"{'idiom':12}" + "".join(f"{c:>9}" for c in COLS))
     for idiom in dict.fromkeys(i for i, _ in res):
         print(f"{idiom:12}" + "".join(f"{short[res[idiom, c][0]]:>9}" for c in COLS))
@@ -137,7 +143,12 @@ def report(res):
     for (idiom, col), (_, prog, got, want) in bad:
         print(f"\n## {idiom}/{col}\n{prog}\n-> got:  {got[:200]!r}\n   want: {want!r}")
     n = sum(r[0].startswith("match") for r in res.values())
-    print(f"\n{n} of {len(res)} cells agree; {len(bad)} differ")
+    nyi = sum(r[0] == "nyi" for r in res.values())
+    err = [(k, r) for k, r in res.items() if r[0] == "error"]
+    for (idiom, col), (_, prog, got, want) in err:
+        print(f"\n## {idiom}/{col} (error)\n{prog}\n-> got:  {got[:200]!r}")
+    print(f"\n{n} of {len(res)} cells agree; {len(bad)} differ; {len(err)} raise an error; "
+          f"{nyi} not implemented (kbm)")
     return len(bad)
 
 
@@ -149,9 +160,10 @@ def tests(res):
         if not v.startswith("match") or (ROOT / "reg" / f"{name}.rgt").exists():
             continue
         how = "agrees with X_eTaL" + (" counting from 0" if v == "match-0-origin" else "")
-        what = "ngn/k expression run unchanged in Kona" if col == "k3" else "expression"
+        what = {"k3": "ngn/k expression run unchanged in Kona",
+                "kbm": "ngn/k expression run unchanged in kbm"}.get(col, "expression")
         desc = f"{NAMES[idiom]} in {col}: {how}. Credit: {what} from {CREDIT}."
-        subprocess.run([str(ROOT / "scripts/reg.sh"), "create", "-t", name, "--timeout", "60",
+        subprocess.run([str(ROOT / "scripts/reg.sh"), "create", "-t", name, "--timeout", "180",
                         "-c", f"scripts/idiom.py run {idiom} {col}", "--desc", desc], check=True,
                        stdout=subprocess.DEVNULL)
         made += 1

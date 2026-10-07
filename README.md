@@ -23,7 +23,7 @@ a reason, rather than forced.
 | `bqn` | BQN | CBQN |
 | `k` | K | ngn/k |
 | `k3` | K3 | Kona |
-| `kbm` | k edu, a subset of K | kbm, on BareMetal-OS under QEMU (not yet built) |
+| `kbm` | k edu, a subset of K | kbm, on BareMetal-OS under QEMU |
 | `uiua` | Uiua | uiua |
 | `xetal` | X_eTaL | [X_eTaL](https://github.com/softwarewrighter/X_eTaL) |
 
@@ -34,22 +34,24 @@ Dyalog APL is deferred until its license terms are settled.
 The first idiom set is X_eTaL's own: the 31 idioms its Rosetta stone
 compares across APL2, Dyalog, J, BQN, ngn/k, Uiua and X_eTaL, plus 18
 from its idiom table. Of the 16 that have an input and an expected
-output, 108 of 112 cells agree across seven runtimes (10 after allowing
-for counting from 0), and each agreeing cell is a reg-rs test: 115
+output, 112 of 128 cells agree across eight runtimes (11 after allowing
+for counting from 0), and each agreeing cell is a reg-rs test: 120
 tests with the runtime checks, all passing. Four cells turned out to be
-wrong in X_eTaL's data. Details, the design and what comes next are in
+wrong in X_eTaL's data, and kbm, a deliberately small k, handles 4 of
+the 16. Details, the design and what comes next are in
 [`docs/plan.md`](docs/plan.md).
 
 ## Quick start
 
 Needs `reg-rs`, Homebrew, cargo, clang and make; X_eTaL built next door
-in `../X_eTaL`.
+in `../X_eTaL`, and kbm's fork in `../kbm-fork`.
 
 ```bash
-scripts/runtimes.sh install     # Kona, GNU APL, J, Uiua, CBQN, ngn/k
+scripts/runtimes.sh install     # Kona, GNU APL, J, Uiua, CBQN, ngn/k, kbm
 scripts/runtimes.sh doctor      # each runtime answers 1+1
 scripts/idiom.py check          # X_eTaL's idioms in every runtime
 scripts/reg.sh run              # the regression tests in reg/
+echo '|"ABCDE"' | scripts/runtimes.sh run kbm   # one line of k, booted in QEMU
 ```
 
 Runtimes built from source live under `work/`, which is not committed;

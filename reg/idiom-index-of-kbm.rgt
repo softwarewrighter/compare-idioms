@@ -1,0 +1,4 @@
+command = "scripts/idiom.py run index-of kbm"
+timeout = 180
+exit_code = 0
+desc = "Index of in kbm: agrees with X_eTaL counting from 0. Credit: ngn/k expression run unchanged in kbm from X_eTaL Rosetta data (Michael A Wright, MIT)."

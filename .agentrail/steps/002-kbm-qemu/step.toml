@@ -1,8 +1,9 @@
 number = 2
 slug = "kbm-qemu"
-status = "in-progress"
+status = "completed"
 description = "install nasm and get kbm running under QEMU from ../kbm-fork, driven as one transcript"
 role = "legacy"
 context_files = []
 created_at = "2026-10-06T13:37:04"
-commits = []
+completed_at = "2026-10-07T12:30:47"
+commits = ["b4f48c7c5ce9fff1c945c6c37ad42bf052fabd05"]

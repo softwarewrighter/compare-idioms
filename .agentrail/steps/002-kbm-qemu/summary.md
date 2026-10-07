@@ -1,0 +1,1 @@
+kbm runs under QEMU on the Mac: scripts/runtimes.sh install/run kbm (BareMetal-OS under work/runtimes, fork's qemu-portable.sh golden passes, ~8 s per boot). kbm column added to scripts/idiom.py with nyi and error classification. 112/128 cells agree; kbm 4 of 16 (iota, count, index-of, reverse), 6 nyi, 2 errors, 4 differ. 120 reg-rs tests pass. Docs updated. Pushed to main.
